@@ -34,17 +34,17 @@ const authenticateJWT = (req, res, next) =>{
 
 // Login
 router.post('/login', async (req, res) => {
-    const {id, password} = req.body;
-    if(!id || !password){
+    const {phone, password} = req.body;
+    if(!phone || !password){
         res.json({msg:"You have to enter all the details"})
     }
     else{
         try{
-            const user = await database.collection("users").find({$and:[{id:id}, {password:password}]}).toArray();
+            const user = await database.collection("users").find({$and:[{phone:phone}, {password:password}]}).toArray();
             if(user.length !== 0){
-                jwt.sign({user: user }, secretAccessToken,{ expiresIn: 60 * 60 },(err, token) => {
+                jwt.sign({user: user }, secretAccessToken, (err, token) => {
                     res.cookie('token', "Bearer "+token, { httpOnly: true });
-                    res.redirect('/api/students');
+                    res.redirect('/api/products');
                 });
             }
             else{
@@ -58,19 +58,19 @@ router.post('/login', async (req, res) => {
 })
 
 // Get all students
-router.get('/', authenticateJWT, async (req, res) => {
-            jwt.verify(req.token, secretAccessToken, async (err, authData) => {
-                if(err){
-                    res.sendStatus(403);
-                }
-                else{
-                    req.authData = authData;
-                    res.cookie('authData', authData, { httpOnly: true }, "/");
-                }
-            });
+router.get('/', async (req, res) => {
+            // jwt.verify(req.token, secretAccessToken, async (err, authData) => {
+            //     if(err){
+            //         res.sendStatus(403);
+            //     }
+            //     else{
+            //         req.authData = authData;
+            //         res.cookie('authData', authData, { httpOnly: true }, "/");
+            //     }
+            // });
             try{
-                let allStudents = await database.collection("students_data").find({}).toArray();
-                res.render('students', {allStudents});
+                let allStudents = await database.collection("users").find({}).toArray();
+                res.json({allStudents});
             }
             catch (err){
                 console.error(err);
@@ -79,7 +79,7 @@ router.get('/', authenticateJWT, async (req, res) => {
 )
 
 // Create a student record
-router.post('/', 
+router.post('/post', 
     [validateId, isIDInUse, validateEmail, isEmailInUse, validatePassword],
     async (req, res) => {
         const {id, name, branch, email, password} = req.body;
