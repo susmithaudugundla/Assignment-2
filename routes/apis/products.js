@@ -6,7 +6,7 @@ const emailExistence = require('email-existence');
 const { validateId, validateEmail, isEmailInUse, validatePassword, isIDInUse } = require('../../validator')
 const secretAccessToken = "secret";
 const MongoClient = require('mongodb').MongoClient;
-const uri = process.env.MONGODB_URI || "mongodb+srv://FirstAssignment:Susmi@123@assignment-1.ksf6u.mongodb.net/Students?retryWrites=true&w=majority";
+const uri = process.env.MONGODB_URI || "mongodb+srv://FirstAssignment:Susmi@123@assignment-1.ksf6u.mongodb.net/Shopping?retryWrites=true&w=majority";
 let database;
 
 
@@ -14,7 +14,7 @@ MongoClient.connect(uri,{ useUnifiedTopology: true, useNewUrlParser: true }, (er
         if (err) {
             console.log("Connection failed to database", err);
           } else {
-            database = conn.db("Students");
+            database = conn.db("Shopping");
             console.log("Connection Successfull");
           }
         }
@@ -40,7 +40,7 @@ router.post('/login', async (req, res) => {
     }
     else{
         try{
-            const user = await database.collection("students_data").find({$and:[{id:id}, {password:password}]}).toArray();
+            const user = await database.collection("users").find({$and:[{id:id}, {password:password}]}).toArray();
             if(user.length !== 0){
                 jwt.sign({user: user }, secretAccessToken,{ expiresIn: 60 * 60 },(err, token) => {
                     res.cookie('token', "Bearer "+token, { httpOnly: true });
