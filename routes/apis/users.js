@@ -77,7 +77,7 @@ router.get('/deleteProfile/:id', authenticateJWT, async (req, res) =>{
             res.sendStatus(403);
         }
         else{
-            const id = req.params.id;
+            const id = parseInt(req.params.id);
             try{
                 const deleted = await database.collection("users").deleteOne({id: id});
                 if(deleted.deletedCount !== 0){
@@ -116,7 +116,7 @@ router.get('/getProfile/:id', authenticateJWT, async (req, res) =>{
             res.sendStatus(403);
         }
         else{
-            const id = req.params.id;
+            const id = parseInt(req.params.id);
             try{
                 const user = await database.collection("users").find({id: id}).toArray();
                 const user_data = user[0];
@@ -165,7 +165,7 @@ router.post('/resetPassword/:id', authenticateJWT,
                 return res.status(400).json({ errors:errors.array()});
             }
             try{                                                            
-                const id = req.params.id;
+                const id = parseInt(req.params.id);
                 let passwordUpdate = await database.collection("users").updateOne({$and: [{password:oldPassword}, {id:id}]}, {$set:{password:password}});
                 if(passwordUpdate.modifiedCount !== 0){
                     res.send("<h1>Updated successfully</h1>");
@@ -195,7 +195,7 @@ router.post('/updateProfile/:id', authenticateJWT,
                 res.sendStatus(403);
             }
             else{
-                const id = req.params.id;
+                const id = parseInt(req.params.id);
                 const {name, phone, email, door, street, city, state, pin} = req.body;
                 if( !name || !phone || !email || !door || !street || !city || !state || !pin ){
                     return res.status(400).json({msg:"You have to enter all the details"})
@@ -246,10 +246,10 @@ router.post('/updateProfile/:id', authenticateJWT,
 
 // Create user record
 router.post('/', 
-    [validateID, isIDInUse, validatePhone, isPhoneInUse, validateEmail, isEmailInUse, validatePin, validatePassword],
+    [validatePhone, isPhoneInUse, validateEmail, isEmailInUse, validatePin, validatePassword],
     async (req, res) => {
-        const {name, id, phone, email, door, street, city, state, pin, password} = req.body;
-        if( !name || !id || !phone || !email || !door || !street || !city || !state || !pin || !password ){
+        const {name, phone, email, door, street, city, state, pin, password} = req.body;
+        if( !name || !phone || !email || !door || !street || !city || !state || !pin || !password ){
             return res.status(400).json({msg:"You have to enter all the details"})
         }
         else{
@@ -260,8 +260,11 @@ router.post('/',
             try{
                 emailExistence.check(email, async (err, resp) => {
                     if(resp){
+                        await database.collection("counters").updateOne({_id:"userid"}, {$inc:{userSeq:1}});
+                        let seqVal = await database.collection("counters").find({_id:"userid"}).toArray();
+                        seqVal = seqVal[0].userSeq;
                         let addUser = await database.collection("users").insertOne({
-                            id: id,
+                            id: seqVal,
                             name: name,
                             phone: phone,
                             email:email,

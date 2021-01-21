@@ -14,7 +14,7 @@ MongoClient.connect(uri,{ useUnifiedTopology: true, useNewUrlParser: true }, (er
   )
 
 module.exports = {
-    validateID:   check('id').matches(/^(\d{12})|(R(\d{6}))$/).withMessage('Invalid ID'),
+    validateID:   check('id').matches(/^(\d{12})|(R(\d{6}))$/).withMessage('Enter 12 digits or id in the format of R151501'),
     isIDInUse:    check('id').custom(async value => {
         const val = await database.collection("users").find({id:value}).count();
         if(val>0){
