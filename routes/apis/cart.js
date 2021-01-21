@@ -84,8 +84,11 @@ router.get('/', authenticateJWT, (req, res) => {
                     const id = authData.user[0].id;
                     let allProductsInCart = await database.collection("users").find({id:id}).toArray();
                     allProductsInCart = allProductsInCart[0].cart;
-                    //allProductsInCart = allProductsInCart.map(product => product[0])
-                    res.render('cart', {allProductsInCart});
+                    if(allProductsInCart.length !== 0){
+                        res.render('cart', {allProductsInCart});
+                    } else{
+                        res.send("<h1>Nothing is added to cart</h1>")
+                    }
                 }
             });
 })
