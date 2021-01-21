@@ -145,10 +145,10 @@ router.get('/', authenticateJWT, (req, res) => {
                     req.authData = authData;
                     const id = authData.user[0].id;
                     let allProducts = await database.collection("products").find({}).toArray();
-                    let users = await database.collection("users").find({id:"R151501"}).toArray();
-                    users = users[0].cart;
-                    users.map(user => {
-                        const index = allProducts.findIndex(x => x.id == user.id);
+                    let users = await database.collection("users").find({id:id}).toArray();
+                    let products = users[0].cart;
+                    products.map(product => {
+                        const index = allProducts.findIndex(x => x.id == product.id);
                         if(index !== -1){
                             allProducts.splice(index, 1)
                         }
