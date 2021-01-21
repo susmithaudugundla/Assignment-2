@@ -3,9 +3,8 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const { validateProductName, validateURL, validateCompanyName, validateCost, validateDetails} = require('../../validator')
-const secretAccessToken = "secret";
 const MongoClient = require('mongodb').MongoClient;
-const uri = process.env.MONGODB_URI || "mongodb+srv://FirstAssignment:Susmi@123@assignment-1.ksf6u.mongodb.net/Shopping?retryWrites=true&w=majority";
+const uri = process.env.MONGODB_URI;
 let database;
 
 MongoClient.connect(uri,{ useUnifiedTopology: true, useNewUrlParser: true }, (err, conn) => {
