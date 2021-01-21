@@ -1,6 +1,6 @@
 const MongoClient = require('mongodb').MongoClient;
 const { check, body } = require('express-validator');
-const uri = process.env.MONGODB_URI || "mongodb+srv://FirstAssignment:Susmi@123@assignment-1.ksf6u.mongodb.net/Shopping?retryWrites=true&w=majority";
+const uri = process.env.MONGODB_URI;
 let database;
 
 MongoClient.connect(uri,{ useUnifiedTopology: true, useNewUrlParser: true }, (err, conn) => {
@@ -14,13 +14,6 @@ MongoClient.connect(uri,{ useUnifiedTopology: true, useNewUrlParser: true }, (er
   )
 
 module.exports = {
-    validateID:   check('id').matches(/^(\d{12})|(R(\d{6}))$/).withMessage('Enter 12 digits or id in the format of R151501'),
-    isIDInUse:    check('id').custom(async value => {
-        const val = await database.collection("users").find({id:value}).count();
-        if(val>0){
-            throw new Error('ID Number already in use') ;
-        }
-    }),
     validatePhone:   check('phone').matches(/^(9|8|7|6)(\d{9})$/).withMessage('Enter correct phone number'),
     isPhoneInUse:    check('phone').custom(async value => {
                     console.log(typeof value);

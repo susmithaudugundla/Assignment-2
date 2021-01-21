@@ -3,9 +3,10 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const emailExistence = require('email-existence');
+const nodemailer = require('nodemailer');
 const { validatePhone, isPhoneUpdateInUse, validateEmail, isEmailInUse, isEmailUpdateInUse, validatePassword, validateConfirmPassword, isPhoneInUse, validatePin } = require('../../validator')
 const MongoClient = require('mongodb').MongoClient;
-const uri = process.env.MONGODB_URI || "mongodb+srv://FirstAssignment:Susmi@123@assignment-1.ksf6u.mongodb.net/Shopping?retryWrites=true&w=majority";
+const uri = process.env.MONGODB_URI;
 let database;
 
 MongoClient.connect(uri,{ useUnifiedTopology: true, useNewUrlParser: true }, (err, conn) => {
@@ -299,34 +300,33 @@ router.use('/forgotpassword', async (req, res) =>{
         return res.send("<h1>You are not registered</h1>")
     }
     const pass = user[0].password;
-    console.log(pass);
     let transporter = nodemailer.createTransport({
         host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+        port: 465,
+        secure: true,
         auth: {
-            user: "udugundlasusmitha@gmail.com", 
+            user: process.env.EMAIL_ID, 
             pass: "", 
         },
     });
 
-  let mailDetails = {
-    from: "udugundlasusmitha@gmail.com", 
-    to: mail,
-    subject: "Password", 
-    text: `Your password is ${pass}`, 
-    html: `<b>Your password is ${pass}</b>`
-    }
+    let mailDetails = {
+        from: process.env.EMAIL_ID, 
+        to: mail,
+        subject: "Password", 
+        text: `Your password is ${pass}`, 
+        html: `<b>Your password is ${pass}</b>`
+        }
 
-  transporter.sendMail( mailDetails, (err, response) => {
-      if(err){
-          return res.json({err});
-      }
-      else{
-            res.send("<h1>Password sent to your registered mail</h1>")
-          console.log(JSON.stringify(res));
-      }
-  });
+    transporter.sendMail( mailDetails, (err, response) => {
+        if(err){
+            return res.json({err});
+        }
+        else{
+                res.send("<h1>Password sent to your registered mail</h1>")
+            console.log(JSON.stringify(res));
+        }
+    });
 
 })
 
