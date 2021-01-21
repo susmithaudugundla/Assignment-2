@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
@@ -137,7 +138,7 @@ router.post('/', authenticateJWT,
 
 //Get all products
 router.get('/', authenticateJWT, (req, res) => {
-    jwt.verify(req.token, secretAccessToken, async (err, authData) => {
+    jwt.verify(req.token, process.env.SECRET_ACCESS_TOKEN, async (err, authData) => {
                 if(err){
                     res.sendStatus(403);
                 }
