@@ -1,0 +1,34 @@
+<div class="container">
+    <div class="row" style="">
+        <div class="col-6">
+            <a href="/api/cart">Go To Cart Page</a>
+            <a href="addProduct" >Add Product</a>
+        </div>
+        <div class="col-6" style="display: flex; justify-content:space-around; margin-bottom:10px; margin-top:10px ">
+            <a href="/api/users/getProfile/{{id}}" >Update profile</a>
+            <a href="/api/users/resetPass" >Reset Password</a>
+            <a href="/api/users/logout" >Logout</a>
+            <a href="/api/users/deleteProfile/{{id}}" >Delete profile</a>
+        </div>
+    </div>
+    
+    
+    <div class="container display-property" style="">
+        <div class="row" style="display: flex; justify-content:space-around">
+            {{#each allProducts}}
+                <div class="card" onclick="/api/products/one" style="width: 21rem; margin:5px">
+                    <img class="card-img-top" src={{this.url}}>
+                    <div class="card-body">
+                        <div><p class="bold">Pruduct name: <span class="span-bold">{{this.name}}</span></p></div>
+                        <div><p class="bold">Cost: <span class="span-bold">{{this.cost}}</span></p></div>
+                        <div><p class="bold">Company: <span class="span-bold">{{this.company}}</span></p></div>
+                        <div><p class="bold"><a href={{this.online_shopping_link}}>More Details</a></p></div>
+                        <div><p class="bold"><a href="/api/cart/add/{{this.id}}">Add to Cart</a></p></div>
+                        <div><p class="bold"><a href="/api/products/get/{{this.id}}">Update the Product</a></p></div>
+                        <div><p class="bold"><a href="/api/products/delete/{{this.id}}">Remove the Product</a></p></div>
+                    </div>    
+                </div>
+            {{/each}}
+        </div>
+    </div>
+</div>

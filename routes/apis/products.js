@@ -2,13 +2,11 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
-const emailExistence = require('email-existence');
-const { validateId, validateEmail, isEmailInUse, validatePassword, isIDInUse } = require('../../validator')
+const { validateProductName, validateURL, validateCompanyName, validateCost, validateDetails} = require('../../validator')
 const secretAccessToken = "secret";
 const MongoClient = require('mongodb').MongoClient;
 const uri = process.env.MONGODB_URI || "mongodb+srv://FirstAssignment:Susmi@123@assignment-1.ksf6u.mongodb.net/Shopping?retryWrites=true&w=majority";
 let database;
-
 
 MongoClient.connect(uri,{ useUnifiedTopology: true, useNewUrlParser: true }, (err, conn) => {
         if (err) {
@@ -32,58 +30,55 @@ const authenticateJWT = (req, res, next) =>{
     }
 }
 
-// Login
-router.post('/login', async (req, res) => {
-    const {phone, password} = req.body;
-    if(!phone || !password){
-        res.json({msg:"You have to enter all the details"})
-    }
-    else{
-        try{
-            const user = await database.collection("users").find({$and:[{phone:phone}, {password:password}]}).toArray();
-            if(user.length !== 0){
-                jwt.sign({user: user }, secretAccessToken, (err, token) => {
-                    res.cookie('token', "Bearer "+token, { httpOnly: true });
-                    res.redirect('/api/products');
-                });
-            }
-            else{
-                res.send("<h3>Entered incorrect details</h3>");
-            }
-        }
-        catch(err){
-            console.log(err);
-        }
-    }
-})
-
-// Get all students
-router.get('/', async (req, res) => {
-            // jwt.verify(req.token, secretAccessToken, async (err, authData) => {
-            //     if(err){
-            //         res.sendStatus(403);
-            //     }
-            //     else{
-            //         req.authData = authData;
-            //         res.cookie('authData', authData, { httpOnly: true }, "/");
-            //     }
-            // });
+//Delete the product
+router.get('/delete/:id', authenticateJWT, async (req, res) => {
+    const id = parseInt(req.params.id);
             try{
-                let allStudents = await database.collection("users").find({}).toArray();
-                res.json({allStudents});
+                const deleted = await database.collection("products").deleteOne({id: id});
+                if(deleted.deletedCount !== 0){
+                    res.redirect('/api/products');
+                }
+                else{
+                    res.send({
+                        status: 404,
+                        data: "Product Not Found",
+                    });
+                } 
             }
             catch (err){
                 console.error(err);
             }
-          } 
-)
+})
 
-// Create a student record
-router.post('/post', 
-    [validateId, isIDInUse, validateEmail, isEmailInUse, validatePassword],
+
+//Get one product
+router.get('/get/:id', authenticateJWT, async (req, res) => {
+    const id = parseInt(req.params.id);
+            try{
+                const product = await database.collection("products").find({id: id}).toArray();
+                const productData = product[0];
+                if(product.length !== 0){
+                    res.render('updateProduct', {productData});
+                }
+                else{
+                    res.send({
+                        status: 404,
+                        data: "Profile Not Found",
+                    });
+                }
+            }
+            catch (err){
+                console.error(err);
+            }
+})
+
+//Update product
+router.post('/update/:id', authenticateJWT,
+    [validateProductName, validateURL, validateCompanyName, validateCost, validateDetails],
     async (req, res) => {
-        const {id, name, branch, email, password} = req.body;
-        if(!id || !name || !branch || !email || !password){
+        const id = parseInt(req.params.id);
+        const {name, url, cost, company, online_shopping_link} = req.body;
+        if( !name || !url || !cost || !company || !online_shopping_link ){
             return res.status(400).json({msg:"You have to enter all the details"})
         }
         else{
@@ -92,26 +87,76 @@ router.post('/post',
                 return res.status(400).json({ errors:errors.array()});
             }
             try{
-                emailExistence.check(email, async (err, resp) => {
-                    if(resp){
-                        let addStudent = await database.collection("students_data").insertOne({
-                            id:id,
-                            name: name,
-                            email:email,
-                            branch:branch,
-                            password:password
-                        });
-                        res.send("<h1>Recorded successfully</h1>");
-                    }
-                    else{
-                        res.send("<h1>Enter a valid email</h1>");
-                    }
-                })
+                let updateProduct = await database.collection("products").updateOne({id:id},[{$set:{
+                    name: name,
+                    url:url,
+                    cost:cost,
+                    company:company,
+                    online_shopping_link:online_shopping_link
+                }}]);
+                res.redirect('/api/products');        
             }
             catch(err){
                 console.error(err);
             }  
         }
+    })
+
+// Add product
+router.post('/', authenticateJWT,
+    [validateProductName, validateURL, validateCompanyName, validateCost, validateDetails],
+    async (req, res) => {
+        const {name, url, cost, company, online_shopping_link} = req.body;
+        if( !name || !url || !cost || !company || !online_shopping_link ){
+            return res.status(400).json({msg:"You have to enter all the details"})
+        }
+        else{
+            const errors = validationResult(req);
+            if(!errors.isEmpty()){
+                return res.status(400).json({ errors:errors.array()});
+            }
+            try{
+                await database.collection("counters").updateOne({_id:"userid"}, {$inc:{seq:1}});
+                let seqVal = await database.collection("counters").find({_id:"userid"}).toArray();
+                seqVal = seqVal[0].seq;
+                let addProduct = await database.collection("products").insertOne({
+                    id: seqVal,
+                    name: name,
+                    url:url,
+                    cost:cost,
+                    company:company,
+                    online_shopping_link:online_shopping_link
+                });
+                res.redirect('/api/products');        
+            }
+            catch(err){
+                console.error(err);
+            }  
+        }
+})
+
+//Get all products
+router.get('/', authenticateJWT, (req, res) => {
+    jwt.verify(req.token, secretAccessToken, async (err, authData) => {
+                if(err){
+                    res.sendStatus(403);
+                }
+                else{
+                    req.authData = authData;
+                    const id = authData.user[0].id;
+                    let allProducts = await database.collection("products").find({}).toArray();
+                    let users = await database.collection("users").find({id:"R151501"}).toArray();
+                    users = users[0].cart;
+                    users.map(user => {
+                        const index = allProducts.findIndex(x => x.id == user.id);
+                        if(index !== -1){
+                            allProducts.splice(index, 1)
+                        }
+                    })
+                    res.cookie('authData', authData, { httpOnly: true }, "/");
+                    res.render('productsList', {id, allProducts});
+                }
+            });
 })
 
 module.exports = router;

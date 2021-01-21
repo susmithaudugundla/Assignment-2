@@ -1,0 +1,17 @@
+
+img{
+    width:220px;
+    height:200px;
+}
+.card div,h4{
+    text-decoration: none;
+    margin-left: 20px;
+}
+.display-property{
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-around;
+    margin-left:auto;
+    margin-right:auto
+}  

@@ -1,0 +1,18 @@
+<div class="container">
+    <div class="container display-property" style="">
+        <div class="row" style="display: flex; justify-content:space-around">
+            {{#each allProductsInCart}}
+                <div class="card" onclick="/api/products/one" style="width: 21rem; margin:5px">
+                    <img class="card-img-top" src={{this.url}}>
+                    <div class="card-body">
+                        <div><p class="bold">Pruduct name: <span class="span-bold">{{this.name}}</span></p></div>
+                        <div><p class="bold">Cost: <span class="span-bold">{{this.cost}}</span></p></div>
+                        <div><p class="bold">Company: <span class="span-bold">{{this.company}}</span></p></div>
+                        <div><p class="bold"><a href={{this.online_shopping_link}}>More Details</a></p></div>
+                        <div><p class="bold"><a href="/api/cart/remove/{{this.id}}">Remove Product from Cart</a></p></div>
+                    </div>    
+                </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
