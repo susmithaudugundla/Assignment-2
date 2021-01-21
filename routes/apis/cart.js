@@ -1,9 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
-const { validationResult } = require('express-validator');
-const { validateProductName, validateURL, validateCompanyName, validateCost, validateDetails} = require('../../validator')
-const secretAccessToken = "secret";
 const MongoClient = require('mongodb').MongoClient;
 const uri = process.env.MONGODB_URI || "mongodb+srv://FirstAssignment:Susmi@123@assignment-1.ksf6u.mongodb.net/Shopping?retryWrites=true&w=majority";
 let database;
@@ -75,7 +72,7 @@ router.get('/add/:id', authenticateJWT,
 
 //Get all products in cart
 router.get('/', authenticateJWT, (req, res) => {
-    jwt.verify(req.token, secretAccessToken, async (err, authData) => {
+    jwt.verify(req.token, process.env.SECRET_ACCESS_TOKEN, async (err, authData) => {
                 if(err){
                     res.sendStatus(403);
                 }

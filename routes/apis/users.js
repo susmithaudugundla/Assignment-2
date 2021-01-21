@@ -43,7 +43,7 @@ router.post('/login', async (req, res) => {
         try{
             const user = await database.collection("users").find({$and:[{phone:phone}, {password:password}]}).toArray();
             if(user.length !== 0){
-                jwt.sign({user: user }, secretAccessToken, (err, token) => {
+                jwt.sign({user: user }, process.env.SECRET_ACCESS_TOKEN, (err, token) => {
                     res.cookie('token', "Bearer "+token, { httpOnly: true });
                     res.redirect('/api/products');
                 });
@@ -72,7 +72,7 @@ router.get('/', async (req, res) => {
 
 // Delete user profile
 router.get('/deleteProfile/:id', authenticateJWT, async (req, res) =>{
-    jwt.verify(req.token, secretAccessToken, async (err, authData) => {
+    jwt.verify(req.token, process.env.SECRET_ACCESS_TOKEN, async (err, authData) => {
         if(err){
             res.sendStatus(403);
         }
@@ -111,7 +111,7 @@ router.use('/logout', (req, res) =>{
 
 // Get user profile
 router.get('/getProfile/:id', authenticateJWT, async (req, res) =>{
-    jwt.verify(req.token, secretAccessToken, async (err, authData) => {
+    jwt.verify(req.token, process.env.SECRET_ACCESS_TOKEN, async (err, authData) => {
         if(err){
             res.sendStatus(403);
         }
@@ -139,7 +139,7 @@ router.get('/getProfile/:id', authenticateJWT, async (req, res) =>{
 
 //Reset Password
 router.use('/resetPass',authenticateJWT, async (req, res) =>{
-    jwt.verify(req.token, secretAccessToken, async (err, authData) => {
+    jwt.verify(req.token, process.env.SECRET_ACCESS_TOKEN, async (err, authData) => {
         if(err){
             res.sendStatus(403);
         }
@@ -190,7 +190,7 @@ router.post('/resetPassword/:id', authenticateJWT,
 router.post('/updateProfile/:id', authenticateJWT,
     [validatePhone, isPhoneUpdateInUse, validateEmail, isEmailUpdateInUse, validatePin],
     async (req, res) => {
-        jwt.verify(req.token, secretAccessToken, async (err, authData) => {
+        jwt.verify(req.token, process.env.SECRET_ACCESS_TOKEN, async (err, authData) => {
             if(err){
                 res.sendStatus(403);
             }
